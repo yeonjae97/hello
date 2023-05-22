@@ -93,7 +93,6 @@ public class TodoController {
 
   @DeleteMapping
   public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto) {
-
     try {
 
       String temporaryUserId = "temporary-user";

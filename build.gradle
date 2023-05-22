@@ -8,6 +8,7 @@ group = 'kr.co.sukbinggo'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -33,6 +34,22 @@ dependencies {
 	compileOnly group: 'javax.servlet.jsp', name: 'javax.servlet.jsp-api', version: '2.3.3'
 	// https://mvnrepository.com/artifact/com.google.guava/guava
 	implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools
+	implementation 'org.springframework.boot:spring-boot-devtools'
+
+
+	// https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
+	implementation("org.mariadb.jdbc:mariadb-java-client:3.1.4")
+
+
+	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+
+	// https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+
+
 
 
 
