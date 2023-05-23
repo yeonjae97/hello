@@ -2,6 +2,8 @@ package kr.co.sukbinggo.hello.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.co.sukbinggo.hello.config.WebSecurityConfig;
 import kr.co.sukbinggo.hello.dto.ResponseDTO;
 import kr.co.sukbinggo.hello.dto.UserDTO;
 import kr.co.sukbinggo.hello.model.UserEntity;
@@ -27,6 +30,11 @@ public class UserController {
   @Autowired
   private TokenProvider tokenProvider;
 
+  // Bean으로 등록 가능
+  private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  // @Autowired
+  // private WebSecurityConfig passwordEncoder;
+
   @PostMapping("signup")
   public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
     try {
@@ -36,7 +44,8 @@ public class UserController {
 
       UserEntity user = UserEntity.builder()
           .username(userDTO.getUsername())
-          .password(userDTO.getPassword())
+          // .password(userDTO.getPassword())
+          .password(passwordEncoder.encode(userDTO.getPassword()))
           .build();
 
       UserEntity registeredUser = userService.create(user);
@@ -60,7 +69,8 @@ public class UserController {
   public ResponseEntity<?> authenticate(@RequestBody UserDTO userDTO) {
     UserEntity user = userService.getByCredentials(
         userDTO.getUsername(),
-        userDTO.getPassword());
+        userDTO.getPassword(),
+        passwordEncoder);
 
     if (user != null) {
       final String token = tokenProvider.create(user);

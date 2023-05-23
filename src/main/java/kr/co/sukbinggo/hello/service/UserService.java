@@ -1,6 +1,7 @@
 package kr.co.sukbinggo.hello.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import kr.co.sukbinggo.hello.model.UserEntity;
@@ -29,7 +30,13 @@ public class UserService {
     return userRepository.save(userEntity);
   }
 
-  public UserEntity getByCredentials(final String username, final String password) {
-    return userRepository.findByUsernameAndPassword(username, password);
+  public UserEntity getByCredentials(final String username, final String password, PasswordEncoder encoder) { // 패스워드
+                                                                                                              // 암호화
+    UserEntity userEntity = userRepository.findByUsername(username);
+    if (userEntity != null && encoder.matches(password, userEntity.getPassword())) {
+      return userEntity;
+    }
+    return null;
+    // return userRepository.findByUsernameAndPassword(username, password);
   }
 }
