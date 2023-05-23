@@ -50,6 +50,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 
+	// https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-client
+	implementation 'org.springframework.security:spring-security-oauth2-client:5.6.1'
 
 
 

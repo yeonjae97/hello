@@ -31,12 +31,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authorizeRequests()
-        .antMatchers("/", "/auth/**").permitAll()
+        .antMatchers("/", "/auth/**", "/oauth2/**", "/mustache/**").permitAll()
         .anyRequest()
         .authenticated()
-        .and().addFilterAfter(jwtAuthenticationFilter, CorsFilter.class);
+        .and()
+        .oauth2Login()
+        .authorizationEndpoint().baseUri("/oauth2/auth");
 
-    // http.addFilterAfter(, null)
+    http.addFilterAfter(jwtAuthenticationFilter, CorsFilter.class);
   }
 
 }
