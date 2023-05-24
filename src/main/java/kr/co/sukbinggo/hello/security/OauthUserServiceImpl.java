@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.sukbinggo.hello.model.UserEntity;
@@ -29,18 +30,32 @@ public class OauthUserServiceImpl extends DefaultOAuth2UserService{
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
     final OAuth2User oAuth2User = super.loadUser(userRequest);
+    log.info("{}", userRequest);
+    log.info("{}", oAuth2User);
     try {
       log.info("Oauth2 User Info{}", new ObjectMapper().writeValueAsString(oAuth2User));
-    } catch (Exception e) {
+    } catch (JsonProcessingException e) {
       e.printStackTrace();
     }
-    final String username = (String) oAuth2User.getAttribute("login");
+    // final String username = (String) oAuth2User.getAttribute("login");
     final String authProvider = userRequest.getClientRegistration().getClientName();
+
+    log.info("{}", authProvider);
+
+    // 여러 개의 oauth 계정을 다루는 것이라면 username은 유일값이면 절대로 안되기 때문에 반드시 유효성을 통해서 검증한다.
+    String username = null;
+    if (authProvider.equalsIgnoreCase("github")) {
+      username = (String) oAuth2User.getAttribute("login");
+    } else if (authProvider.equalsIgnoreCase("google")) {
+      username = (String) oAuth2User.getAttribute("email");
+    } else if (authProvider.equalsIgnoreCase("kakao")) {
+      username = (String) oAuth2User.getAttribute("profile_nickname");
+    } 
 
 
     UserEntity userEntity = null;
     if (!userRepository.existsByUsername(username)) {
-      userEntity = UserEntity.builder().username(username).auth_provider(authProvider).build();
+      userEntity = UserEntity.builder().username(username).authProvider(authProvider).build();
 
       userEntity = userRepository.save(userEntity);
     } else {

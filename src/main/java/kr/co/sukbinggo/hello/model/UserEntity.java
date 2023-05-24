@@ -28,5 +28,5 @@ public class UserEntity {
   private String username; // email
   private String password; // password
   private String role;
-  private String auth_provider;
+  private String authProvider;
 }
