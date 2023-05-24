@@ -9,9 +9,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
+import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.web.filter.CorsFilter;
 
 import kr.co.sukbinggo.hello.security.JwtAuthenticationFilter;
+import kr.co.sukbinggo.hello.security.OAuthSuccessHandler;
+import kr.co.sukbinggo.hello.security.OauthUserServiceImpl;
+import kr.co.sukbinggo.hello.security.RedirectUrlCookieFilter;
 import kr.co.sukbinggo.hello.service.UserService;
 
 @SuppressWarnings("deprecation")
@@ -21,8 +26,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Autowired
   private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+  @Autowired
+  private OauthUserServiceImpl oauthUserServiceImpl;
   // @Autowired
   // private UserService userService;
+
+  @Autowired
+  private OAuthSuccessHandler oAuthSuccessHandler;
+
+  @Autowired
+  private RedirectUrlCookieFilter redirectUrlFilter;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
@@ -36,9 +49,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .authenticated()
         .and()
         .oauth2Login()
-        .authorizationEndpoint().baseUri("/oauth2/auth");
+        .authorizationEndpoint().baseUri("/oauth2/auth")
+        .and()
+        .redirectionEndpoint()
+        .baseUri("/oauth2/callback/*")
+        .and()
+        .userInfoEndpoint()
+        .userService(oauthUserServiceImpl)
+        .and()
+        .successHandler(oAuthSuccessHandler)
+        .and()
+        .exceptionHandling()
+        .authenticationEntryPoint(new Http403ForbiddenEntryPoint()); // success Handler 등록;
 
     http.addFilterAfter(jwtAuthenticationFilter, CorsFilter.class);
+    http.addFilterBefore(redirectUrlFilter, OAuth2AuthorizationRequestRedirectFilter.class);
   }
 
+  @Bean
+  public PasswordEncoder getPasswordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 }

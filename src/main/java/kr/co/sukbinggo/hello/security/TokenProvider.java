@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -37,6 +39,18 @@ public class TokenProvider {
         .parseClaimsJws(token)
         .getBody();
     return claims.getSubject();
+  }
+
+  public String create(Authentication authentication) {
+    ApplicationOAuth2User userPrincipal = (ApplicationOAuth2User) authentication.getPrincipal();
+    Date expiryDate = Date.from(Instant.now().plus(1, ChronoUnit.DAYS));
+
+    return Jwts.builder()
+      .setSubject(userPrincipal.getName())
+      .setIssuedAt(new Date())
+      .setExpiration(expiryDate)
+        .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+      .compact();
   }
 
 }

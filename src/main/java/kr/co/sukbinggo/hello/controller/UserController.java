@@ -31,9 +31,9 @@ public class UserController {
   private TokenProvider tokenProvider;
 
   // Bean으로 등록 가능
-  private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-  // @Autowired
-  // private WebSecurityConfig passwordEncoder;
+  // private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  @Autowired
+  private WebSecurityConfig webSecurityConfig;
 
   @PostMapping("signup")
   public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
@@ -45,7 +45,7 @@ public class UserController {
       UserEntity user = UserEntity.builder()
           .username(userDTO.getUsername())
           // .password(userDTO.getPassword())
-          .password(passwordEncoder.encode(userDTO.getPassword()))
+          .password(webSecurityConfig.getPasswordEncoder().encode(userDTO.getPassword()))
           .build();
 
       UserEntity registeredUser = userService.create(user);
@@ -70,7 +70,7 @@ public class UserController {
     UserEntity user = userService.getByCredentials(
         userDTO.getUsername(),
         userDTO.getPassword(),
-        passwordEncoder);
+        webSecurityConfig.getPasswordEncoder());
 
     if (user != null) {
       final String token = tokenProvider.create(user);
