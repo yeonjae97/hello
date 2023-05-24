@@ -1,5 +1,7 @@
 package kr.co.sukbinggo.hello.security;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -7,7 +9,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.co.sukbinggo.hello.model.UserEntity;
@@ -30,15 +31,14 @@ public class OauthUserServiceImpl extends DefaultOAuth2UserService{
   @Override
   public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
     final OAuth2User oAuth2User = super.loadUser(userRequest);
-    log.info("{}", userRequest);
-    log.info("{}", oAuth2User);
     try {
       log.info("Oauth2 User Info{}", new ObjectMapper().writeValueAsString(oAuth2User));
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
     // final String username = (String) oAuth2User.getAttribute("login");
     final String authProvider = userRequest.getClientRegistration().getClientName();
+
 
     log.info("{}", authProvider);
 
@@ -49,13 +49,14 @@ public class OauthUserServiceImpl extends DefaultOAuth2UserService{
     } else if (authProvider.equalsIgnoreCase("google")) {
       username = (String) oAuth2User.getAttribute("email");
     } else if (authProvider.equalsIgnoreCase("kakao")) {
-      username = (String) oAuth2User.getAttribute("profile_nickname");
+      Map<String, String> map =  oAuth2User.getAttribute("kakao_account");
+      username = map.get("email");
+      log.info(username); // 유저네임 추가
     } 
-
 
     UserEntity userEntity = null;
     if (!userRepository.existsByUsername(username)) {
-      userEntity = UserEntity.builder().username(username).authProvider(authProvider).build();
+      userEntity = UserEntity.builder().username(username).auth_provider(authProvider).build();
 
       userEntity = userRepository.save(userEntity);
     } else {
